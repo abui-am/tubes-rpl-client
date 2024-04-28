@@ -1,12 +1,23 @@
+import { useState } from 'react';
 import Button from '../common/button';
 import Input from '../common/input';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../services/login';
 function FormLogin() {
   const navigate = useNavigate();
-  function handleClick() {
-    Cookies.set('Authorization', 'Bearer token');
-    navigate('/');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  async function handleClick() {
+    try {
+      const res = await login(email, password);
+      Cookies.set('Authorization', res.data.token);
+      navigate('/');
+    } catch (error) {
+      console.log(error);
+      alert('Email atau password salah');
+      return;
+    }
   }
   return (
     <div className='max-w-[640px] text-left shadow-lg p-6 rounded bg-white w-full'>
@@ -18,7 +29,7 @@ function FormLogin() {
           </span>
           <Input
             placeholder='Masukan email'
-            onChange={(e) => console.log(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div>
@@ -28,7 +39,7 @@ function FormLogin() {
           <Input
             placeholder='Masukan password'
             type='password'
-            onChange={(e) => console.log(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         <div className='w-full'>

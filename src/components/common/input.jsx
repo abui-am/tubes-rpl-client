@@ -1,7 +1,11 @@
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import { forwardRef } from 'react';
 
-function Input({ className, hasError, Icon, variant = 'outlined', ...props }) {
+const Input = forwardRef(function (
+  { className, hasError, Icon, variant = 'outlined', ...props },
+  ref
+) {
   const variation =
     variant === 'outlined' ? 'border-gray-300 border' : 'bg-blueGray-100';
   const errorStyle = hasError
@@ -17,6 +21,7 @@ function Input({ className, hasError, Icon, variant = 'outlined', ...props }) {
 
       <input
         {...props}
+        ref={ref}
         className={clsx(
           Icon ? 'pl-11' : '',
           errorStyle,
@@ -29,7 +34,9 @@ function Input({ className, hasError, Icon, variant = 'outlined', ...props }) {
       />
     </div>
   );
-}
+});
+
+Input.displayName = 'Input';
 
 Input.propTypes = {
   className: PropTypes.string,
