@@ -46,8 +46,8 @@ function FormCreateAccount() {
             Role<span className='text-red-600'>*</span>
           </span>
           <select {...register('role')}>
-            <option value={1}>Admin</option>
-            <option value={2}>User</option>
+            <option value={1}>Super Admin</option>
+            <option value={2}>Admin</option>
           </select>
           <Button type='submit'>Submit</Button>
         </div>
