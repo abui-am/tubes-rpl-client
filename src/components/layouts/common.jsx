@@ -10,18 +10,18 @@ function CommonLayout({ children }) {
     navigate('/login');
   }
   return (
-    <section className='flex h-screen'>
-      <div role='navigation flex-1'>
+    <section className='flex h-min-screen w-full min-w-0'>
+      <div role='navigation flex-1 '>
         <Sidebar />
       </div>
-      <div className='bg-[#F9FAFC] w-full'>
-        <div className='py-4 px-8 bg-white justify-between flex border-b border-b-neutral-200'>
+      <div className='bg-[#F9FAFC] flex-1 h-full'>
+        <div className='py-4 px-8 bg-white justify-between flex border-b border-b-neutral-200 sticky top-0 z-10'>
           <div></div>
           <button className='text-sm font-bold' onClick={handleLogout}>
             Logout
           </button>
         </div>
-        <main className='p-6'>{children}</main>
+        <main className='p-10'>{children}</main>
       </div>
     </section>
   );

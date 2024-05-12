@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 function Sidebar() {
   return (
-    <aside className='p-6 w-[207px]'>
+    <aside className='p-6 w-[207px] sticky top-0'>
       <h2 className='text-base font-bold'>Dashboard</h2>
       <section className='mt-8'>
         <Link className='flex items-center gap-2' to='/'>

@@ -4,8 +4,12 @@ import TableAccount from '../components/tables/table-account';
 function UserPage() {
   return (
     <CommonLayout>
-      Account
-      <TableAccount />
+      <div className='pb-8'>
+        <h1 className='text-2xl font-bold'>Create Account</h1>
+      </div>
+      <div className='max-w-6xl mx-auto'>
+        <TableAccount />
+      </div>
     </CommonLayout>
   );
 }
