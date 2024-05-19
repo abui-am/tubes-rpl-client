@@ -1,17 +1,17 @@
 import CommonLayout from '../components/layouts/common';
-import TableAccount from '../components/tables/table-account';
+import TableItems from '../components/tables/table-items';
 
-function UserPage() {
+function ItemsPage() {
   return (
     <CommonLayout>
       <div className='pb-8'>
-        <h1 className='text-2xl font-bold'>Account List</h1>
+        <h1 className='text-2xl font-bold'>Item List</h1>
       </div>
       <div className='max-w-6xl mx-auto'>
-        <TableAccount />
+        <TableItems />
       </div>
     </CommonLayout>
   );
 }
 
-export default UserPage;
+export default ItemsPage;
