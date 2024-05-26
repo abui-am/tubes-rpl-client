@@ -9,6 +9,8 @@ import UserEditPage from './pages/user-edit';
 import ItemsPage from './pages/items';
 import ItemCreatePage from './pages/items-create';
 import ItemEditPage from './pages/items-edit';
+import BorrowItemsPage from './pages/borrow-items';
+import BorrowItemCreatePage from './pages/borrow-items-create';
 
 const router = createBrowserRouter([
   {
@@ -42,6 +44,14 @@ const router = createBrowserRouter([
   {
     path: '/items/:id/edit',
     element: <ItemEditPage />,
+  },
+  {
+    path: '/borrow-items/create',
+    element: <BorrowItemCreatePage />,
+  },
+  {
+    path: '/borrow-items',
+    element: <BorrowItemsPage />,
   },
 ]);
 
