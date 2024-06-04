@@ -5,11 +5,27 @@ import Button from '../common/button';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { createItem, updateItem } from '../../services/item';
+import CreatableSelect from 'react-select/creatable';
+import { useEffect, useState } from 'react';
+import { getBorrower } from '../../services/borrower';
+import ReactModal from 'react-modal';
+import FormCreateBorrower from './form-create-borrower';
 
 function FormCreateBorrowItems({ defaultValues, editId }) {
-  const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset, setValue, getValues } = useForm({
     defaultValues,
   });
+
+  const [options, setOptions] = useState([]);
+
+  const [borrowerName, setBorrowerName] = useState('');
+  async function fetchBorrowers() {
+    const res = await getBorrower();
+    setOptions(res.data.map((item) => ({ value: item.id, label: item.name })));
+  }
+  useEffect(() => {
+    fetchBorrowers();
+  }, []);
 
   const items = [];
   const navigate = useNavigate();
@@ -38,20 +54,52 @@ function FormCreateBorrowItems({ defaultValues, editId }) {
 
   return (
     <div className='bg-white p-6'>
+      <ReactModal
+        style={{
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 1000,
+          },
+          content: {
+            width: '400px',
+            margin: 'auto',
+            borderRadius: '8px',
+            border: 'none',
+            padding: '0',
+            height: 'fit-content',
+          },
+        }}
+        isOpen={!!borrowerName}
+        parentSelector={() => document.body}
+        onRequestClose={() => setBorrowerName('')}
+      >
+        <FormCreateBorrower
+          defaultValues={{
+            name: borrowerName,
+          }}
+          onSave={() => {
+            setBorrowerName('');
+            fetchBorrowers();
+          }}
+        />
+      </ReactModal>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div className='mb-3'>
             <span className='block mb-2 text-left'>
               Borrower <span className='text-red-600'>*</span>
             </span>
-            <select
-              {...register('borrowerId')}
-              className='border border-gray-300 rounded w-full p-2'
-            >
-              <option value='1'>Borrower 1</option>
-              <option value='2'>Borrower 2</option>
-              <option value='3'>Borrower 3</option>
-            </select>
+            <CreatableSelect
+              onCreateOption={(inputValue) => {
+                setBorrowerName(inputValue);
+              }}
+              isClearable
+              value={getValues('borrower')}
+              options={options}
+              onChange={(value) => {
+                setValue('borrower', value);
+              }}
+            />
           </div>
           <div className='mb-3'>
             <span className='block mb-2 text-left'>
