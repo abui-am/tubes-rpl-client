@@ -1,22 +1,81 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import Input from '../common/input';
 import toast from 'react-hot-toast';
 import Button from '../common/button';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { createItem, updateItem } from '../../services/item';
+import { getItems } from '../../services/item';
 import CreatableSelect from 'react-select/creatable';
 import { useEffect, useState } from 'react';
 import { getBorrower } from '../../services/borrower';
 import ReactModal from 'react-modal';
 import FormCreateBorrower from './form-create-borrower';
+import ReactSelect from 'react-select';
+import ReactDatePicker from 'react-datepicker';
+import Cookies from 'js-cookie';
+import { createBorrowItem } from '../../services/borrow-items';
+import dayjs from 'dayjs';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
-function FormCreateBorrowItems({ defaultValues, editId }) {
-  const { register, handleSubmit, reset, setValue, getValues } = useForm({
-    defaultValues,
+const schema = yup
+  .object({
+    borrower: yup
+      .object()
+      .shape({
+        value: yup.string().typeError('Must be string').required('Required'),
+        label: yup.string().typeError('Must be string').required('Required'),
+      })
+      .required(),
+    items: yup.array().of(
+      yup.object().shape({
+        itemId: yup
+          .object()
+          .shape({
+            value: yup
+              .string()
+              .typeError('Must be string')
+              .required('Required'),
+            label: yup
+              .string()
+              .typeError('Must be string')
+              .required('Required'),
+          })
+          .required('Required'),
+        quantity: yup.number().typeError('Must be number').required('Required'),
+      })
+    ),
+    returnedDate: yup.date().typeError('Must be date').required('Required'),
+    description: yup.string().typeError('Must be string'),
+  })
+  .required();
+
+function FormCreateBorrowItems({ defaultValues }) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    getValues,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: defaultValues || {
+      borrower: null,
+      items: [
+        {
+          itemId: null,
+          quantity: null,
+        },
+      ],
+      returnedDate: new Date(),
+      description: '',
+    },
+    resolver: yupResolver(schema),
   });
 
   const [options, setOptions] = useState([]);
+  const [itemOptions, setItemOptions] = useState([]);
 
   const [borrowerName, setBorrowerName] = useState('');
   async function fetchBorrowers() {
@@ -27,28 +86,54 @@ function FormCreateBorrowItems({ defaultValues, editId }) {
     fetchBorrowers();
   }, []);
 
-  const items = [];
+  async function fetchItems() {
+    const res = await getItems();
+    setItemOptions(
+      res.data.map((item) => ({ value: item.id, label: item.name }))
+    );
+  }
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const items = useWatch({ name: 'items', control: control });
+  const borrower = useWatch({
+    name: 'borrower',
+    defaultValue: null,
+    control: control,
+  });
+
+  const returnedDate = useWatch({
+    name: 'returnedDate',
+    defaultValue: new Date(),
+    control: control,
+  });
   const navigate = useNavigate();
-  const isEditMode = !!editId;
+
   async function onSubmit(data) {
     try {
-      if (isEditMode) {
-        await updateItem(editId, {
-          name: data.name,
-          quantity: +data.quantity,
-        });
-      } else {
-        await createItem({
-          name: data.name,
-          quantity: +data.quantity,
-        });
-      }
+      const items = data.items.map((item) => ({
+        itemId: +item.itemId.value,
+        quantity: +item.quantity,
+      }));
 
+      const user = JSON.parse(Cookies.get('user'));
+
+      const userId = user.id;
+
+      await createBorrowItem({
+        userId: userId,
+        borrowerId: +data.borrower.value,
+        items,
+        returnedDate: dayjs(data.returnedDate).toISOString(),
+        description: data.description,
+      });
+      toast.success('Borrower Item created successfully');
       reset();
-      navigate('/items');
-      toast.success('Berhasil membuat items');
+      navigate('/borrow-items');
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast.error('Failed to create Borrower Item');
     }
   }
 
@@ -94,73 +179,142 @@ function FormCreateBorrowItems({ defaultValues, editId }) {
                 setBorrowerName(inputValue);
               }}
               isClearable
-              value={getValues('borrower')}
               options={options}
               onChange={(value) => {
-                setValue('borrower', value);
+                setValue('borrower', value, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
               }}
+              value={borrower}
             />
+
+            {errors.borrower && (
+              <span className='text-red-600 block mt-2'>
+                {errors.borrower.message}
+              </span>
+            )}
           </div>
           <div className='mb-3'>
             <span className='block mb-2 text-left'>
               Items <span className='text-red-600'>*</span>
             </span>
 
-            <div className='border border-gray-300 rounded w-full p-2'>
-              {/* Nested Form */}
-              {items.map((item, index) => (
-                <div key={index} className='flex gap-2'>
-                  <select
-                    {...register(`items.${index}.itemId`)}
-                    className='border border-gray-300 rounded w-full p-2'
+            {/* Nested Form */}
+            {items.map((item, index) => (
+              <div
+                key={index}
+                className='border border-neutral-300 p-4 rounded-xl mb-4 relative'
+              >
+                {index >= 1 && (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      const newItems = items.filter((_, i) => i !== index);
+                      setValue('items', newItems, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
+                    className='absolute top-2 right-2 text-red-600'
                   >
-                    <option value='1'>Item 1</option>
-                    <option value='2'>Item 2</option>
-                    <option value='3'>Item 3</option>
-                  </select>
+                    <svg
+                      width='16'
+                      height='16'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      xmlns='http://www.w3.org/2000/svg'
+                    >
+                      <path
+                        d='M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z'
+                        fill='#888888'
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                <div className='mb-3'>
+                  <span className='block mb-2 text-left'>
+                    Item <span className='text-red-600'>*</span>
+                  </span>
+                  <ReactSelect
+                    options={itemOptions}
+                    value={getValues(`items.${index}.itemId`)}
+                    onChange={(value) => {
+                      setValue(`items.${index}.itemId`, value, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
+                  />
+                  {errors.items &&
+                    errors.items[index] &&
+                    errors.items[index].itemId && (
+                      <span className='text-red-600 block mt-2'>
+                        {errors.items[index].itemId.message}
+                      </span>
+                    )}
+                </div>
+
+                <div className='mb-3'>
+                  <span className='block mb-2 text-left'>
+                    Quantity <span className='text-red-600'>*</span>
+                  </span>
                   <Input
-                    type='number'
-                    placeholder='Masukan qty'
+                    placeholder='Fill quantity'
                     {...register(`items.${index}.quantity`)}
                   />
+                  {errors.items &&
+                    errors.items[index] &&
+                    errors.items[index].quantity && (
+                      <span className='text-red-600 block mt-2'>
+                        {errors.items[index].quantity.message}
+                      </span>
+                    )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
 
             <Button
               type='button'
               onClick={() => {
-                reset({
-                  items: [
-                    ...items,
-                    {
-                      itemId: '',
-                      quantity: 0,
-                    },
-                  ],
+                const newItems = [...items, { itemId: null, quantity: null }];
+                setValue('items', newItems, {
+                  shouldValidate: true,
+                  shouldDirty: true,
                 });
               }}
-              className='mt-2'
+              className='mt-2 p-3'
             >
-              Add Item
+              + Add Item
             </Button>
           </div>
 
           <div className='mb-3'>
             <span className='block mb-2 text-left'>
-              Borrow Date <span className='text-red-600'>*</span>
+              Return Before <span className='text-red-600'>*</span>
             </span>
-            <Input
-              placeholder='Masukan tanggal peminjaman'
-              {...register('borrowDate')}
+            <ReactDatePicker
+              onChange={(date) => {
+                setValue('returnedDate', date, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+              }}
+              selected={returnedDate}
+              dateFormat='dd MMM YYYY'
+              className='w-full border border-neutral-300 rounded-lg p-2'
             />
+            {errors.returnedDate && (
+              <span className='text-red-600 block mt-2'>
+                {errors.returnedDate.message}
+              </span>
+            )}
           </div>
           <div className='mb-3'>
-            <span className='block mb-2 text-left'>
-              Description <span className='text-red-600'>*</span>
-            </span>
+            <span className='block mb-2 text-left'>Description</span>
             <Input
-              placeholder='Masukan deskripsi'
+              placeholder='Fill description'
               {...register('description')}
             />
           </div>
@@ -173,13 +327,5 @@ function FormCreateBorrowItems({ defaultValues, editId }) {
     </div>
   );
 }
-
-FormCreateBorrowItems.propTypes = {
-  defaultValues: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    quantity: PropTypes.number.isRequired,
-  }),
-  editId: PropTypes.string,
-};
 
 export default FormCreateBorrowItems;

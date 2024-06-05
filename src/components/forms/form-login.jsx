@@ -12,6 +12,7 @@ function FormLogin() {
     try {
       const res = await login(email, password);
       Cookies.set('Authorization', res.data.token);
+      Cookies.set('user', JSON.stringify(res.data.user));
       navigate('/');
     } catch (error) {
       console.log(error);

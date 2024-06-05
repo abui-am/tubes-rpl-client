@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.5.0",
     "@tanstack/react-table": "^8.16.0",
     "axios": "^1.6.8",
     "boxicons": "^2.1.4",
@@ -19,13 +20,15 @@
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
     "react": "^18.2.0",
+    "react-datepicker": "^6.9.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.3",
     "react-hot-toast": "^2.4.1",
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.22.3",
     "react-select": "^5.8.0",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

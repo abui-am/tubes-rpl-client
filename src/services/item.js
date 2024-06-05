@@ -21,3 +21,7 @@ export function updateItem(id, { name, quantity }) {
     quantity,
   });
 }
+
+export function deleteItem(id) {
+  return api.delete(`/items/${id}`);
+}

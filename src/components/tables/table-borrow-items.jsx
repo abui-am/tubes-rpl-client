@@ -105,7 +105,7 @@ function TableBorrowItems() {
           items: item.items,
           borrowDate: dayjs(item.createdAt).format('DD MMM YYYY, HH:mm'),
           description: item.description,
-          returnDate: item.returnDate,
+          returnDate: dayjs(item.returnedDate).format('DD MMM YYYY, HH:mm'),
         }))
       );
     } catch (error) {
@@ -189,7 +189,7 @@ function TableBorrowItems() {
           />
         </div>
         <div>
-          <Link to='/items/create'>
+          <Link to='/borrow-items/create'>
             <Button className='flex gap-2'>
               <svg
                 width='16'

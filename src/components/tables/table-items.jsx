@@ -5,13 +5,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
-import { deleteUser } from '../../services/login';
 import { Link, useNavigate } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import Button from '../common/button';
 import toast from 'react-hot-toast';
 import Input from '../common/input';
-import { getItems } from '../../services/item';
+import { deleteItem, getItems } from '../../services/item';
 
 const columnHelper = createColumnHelper();
 
@@ -103,7 +102,7 @@ function TableItems() {
   }
   async function handleDelete(id) {
     try {
-      await deleteUser(id);
+      await deleteItem(id);
       setDeleteId(null);
       await fetchTableData();
 
