@@ -1,30 +1,58 @@
-import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import Button from '../common/button';
 import ReactDatePicker from 'react-datepicker';
 import ReactSelect from 'react-select';
 import { updateBorrowItem } from '../../services/borrow-items';
+import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 
-const ReturnInventoryForm = ({ name, items, id }) => {
-  const { handleSubmit, reset, setValue, getValues, control } = useForm({});
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+const schema = yup.object().shape({
+  returnedDate: yup.date().required(),
+  condition: yup.string().required(),
+});
+
+const ReturnInventoryForm = ({ name, items, id, onSuccess }) => {
+  const {
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      returnedDate: new Date(),
+      condition: '',
+    },
+    resolver: yupResolver(schema),
+  });
 
   const onSubmit = async (data) => {
-    updateBorrowItem(id, {
-      returnedDate: data.returnedDate,
-      condition: data.condition,
-    });
+    try {
+      await updateBorrowItem(id, {
+        returnedDate:
+          dayjs(returnedDate).toISOString() || dayjs().toISOString(),
+        condition: data.condition,
+      });
 
-    reset();
+      onSuccess?.();
+      toast.success('Berhasil mengembalikan barang');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const returnedDate = useWatch({
     control,
     name: 'returnedDate',
+    defaultValue: new Date(),
   });
 
   return (
     <div className='bg-white p-6'>
       <form onSubmit={handleSubmit(onSubmit)}>
+        <h1 className='text-2xl font-bold mb-4'>Return Inventory</h1>
         <div>
           <div className='mb-3'>
             <span className='block mb-2 text-left'>
@@ -36,12 +64,15 @@ const ReturnInventoryForm = ({ name, items, id }) => {
             <span className='block mb-2 text-left'>
               Items<span className='text-red-600'>*</span>
             </span>
-            {items.map((item, index) => (
-              <div key={index} className='flex justify-between'>
-                <span className='text-xl font-bold'>{item.name}</span>
-                <span>{item.quantity}</span>
-              </div>
-            ))}
+            <div className='flex flex-col gap-2'>
+              {items.map((item, index) => {
+                return (
+                  <div key={index} className='text-xl font-bold'>
+                    {item.item?.name} ({item.quantity}x)
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className='mb-3'>
@@ -51,11 +82,15 @@ const ReturnInventoryForm = ({ name, items, id }) => {
             <ReactDatePicker
               selected={returnedDate}
               onChange={(date) => setValue('returnedDate', date)}
-              showTimeSelect
-              timeFormat='HH:mm'
-              timeIntervals={15}
-              timeCaption='time'
+              dateFormat='dd MMMM YYYY'
+              className='w-full p-2 border border-gray-300 rounded-md'
             />
+
+            {errors.returnedDate && (
+              <span className='block text-red-600 mt-2'>
+                This field is required
+              </span>
+            )}
           </div>
 
           <div className='mb-3'>
@@ -77,6 +112,9 @@ const ReturnInventoryForm = ({ name, items, id }) => {
                 setValue('condition', value.value);
               }}
             />
+            {errors.condition && (
+              <span className='text-red-600 mt-2'>This field is required</span>
+            )}
           </div>
 
           <Button type='submit' className='w-full mt-3'>

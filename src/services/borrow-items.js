@@ -1,7 +1,11 @@
 import { api } from '../helpers/axios';
 
-export function getBorrowItems() {
-  return api.get('/borrow-items');
+export function getBorrowItems({ search }) {
+  return api.get('/borrow-items', {
+    params: {
+      search,
+    },
+  });
 }
 
 export function getBorrowItemById(id) {

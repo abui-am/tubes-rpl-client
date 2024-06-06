@@ -6,13 +6,14 @@ import {
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { deleteUser } from '../../services/login';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import Button from '../common/button';
 import toast from 'react-hot-toast';
 import Input from '../common/input';
 import { getBorrowItems } from '../../services/borrow-items';
 import dayjs from 'dayjs';
+import ReturnInventoryForm from '../forms/form-return-inventory';
 
 const columnHelper = createColumnHelper();
 
@@ -80,15 +81,24 @@ function getColumns({ onClickReturn }) {
       header: 'Return Before Date',
     }),
 
+    columnHelper.accessor('returnedDate', {
+      cell: (info) => (
+        <span className='text-neutral-700'>{info.getValue() || '-'}</span>
+      ),
+      footer: (info) => info.column.id,
+      header: 'Returned Date',
+    }),
+
     columnHelper.display({
       cell: (info) => (
         <div className='flex gap-2'>
-          <Button
-            onClick={() => onClickReturn(info.row.original.id)}
-            className='bg-blue-500 text-white'
-          >
-            Return
-          </Button>
+          {info.row.original.isReturned ? (
+            <span className='text-green-500'>Returned</span>
+          ) : (
+            <Button onClick={() => onClickReturn(info.row.original.id)}>
+              Return
+            </Button>
+          )}
         </div>
       ),
       footer: '',
@@ -99,12 +109,12 @@ function getColumns({ onClickReturn }) {
 }
 function TableBorrowItems() {
   const [data, setData] = useState([]);
-  const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState(null);
+  const [returnItemId, setReturnItemId] = useState(null);
   const [search, setSearch] = useState('');
   const columns = getColumns({
     onClickReturn: (id) => {
-      navigate(`/borrow-items/return/${id}`);
+      setReturnItemId(id);
     },
   });
 
@@ -120,6 +130,11 @@ function TableBorrowItems() {
           items: item.items,
           borrowDate: dayjs(item.createdAt).format('DD MMM YYYY, HH:mm'),
           description: item.description,
+          returnedDate:
+            item.status === 'returned'
+              ? dayjs(item.returnedDate).format('DD MMM YYYY, HH:mm')
+              : '-',
+          isReturned: item.status === 'returned',
           returnBefore: dayjs(item.returnBefore).format('DD MMM YYYY, HH:mm'),
         }))
       );
@@ -145,11 +160,26 @@ function TableBorrowItems() {
     data,
   });
 
+  const { items, borrower } =
+    table.getRowModel().rows.find((row) => row.original.id === returnItemId)
+      ?.original || {};
+
   useEffect(() => {
     fetchTableData();
   }, [search]);
   return (
     <div className='bg-white shadow-lg rounded-lg'>
+      {!!returnItemId && (
+        <ModalReturnItem
+          returnItemId={returnItemId}
+          name={borrower.name}
+          items={items}
+          onRequestClose={() => {
+            fetchTableData();
+            setReturnItemId(null);
+          }}
+        />
+      )}
       {!!deleteId && (
         <ReactModal
           isOpen={!!deleteId}
@@ -264,10 +294,13 @@ function TableBorrowItems() {
   );
 }
 
-const ModalReturnItem = ({ returnItemId }) => {
+const ModalReturnItem = ({ returnItemId, name, items, onRequestClose }) => {
   return (
     <ReactModal
       isOpen={!!returnItemId}
+      onRequestClose={() => {
+        onRequestClose();
+      }}
       style={{
         overlay: {
           backgroundColor: 'rgba(0, 0, 0, 0.75)',
@@ -283,13 +316,12 @@ const ModalReturnItem = ({ returnItemId }) => {
         },
       }}
     >
-      <div className='bg-white p-6'>
-        <h2 className='mb-4'>Apakah anda yakin ingin menghapus item ini?</h2>
-        <div className='flex justify-end gap-4'>
-          <Button onClick={() => setDeleteId(null)}>Cancel</Button>
-          <Button onClick={() => handleDelete(deleteId)}>Delete</Button>
-        </div>
-      </div>
+      <ReturnInventoryForm
+        onSuccess={onRequestClose}
+        id={returnItemId}
+        name={name}
+        items={items}
+      />
     </ReactModal>
   );
 };
