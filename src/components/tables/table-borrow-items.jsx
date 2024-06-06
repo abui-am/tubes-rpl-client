@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
 
 const columnHelper = createColumnHelper();
 
-function getColumns({ onClickEdit, onClickDelete }) {
+function getColumns({ onClickReturn }) {
   return [
     columnHelper.display({
       cell: (info) => info.row.index + 1,
@@ -72,12 +72,28 @@ function getColumns({ onClickEdit, onClickDelete }) {
       header: 'Borrow Date',
     }),
 
-    columnHelper.accessor('returnDate', {
+    columnHelper.accessor('returnBefore', {
       cell: (info) => (
         <span className='text-neutral-700'>{info.getValue() || '-'}</span>
       ),
       footer: (info) => info.column.id,
-      header: 'Return Date',
+      header: 'Return Before Date',
+    }),
+
+    columnHelper.display({
+      cell: (info) => (
+        <div className='flex gap-2'>
+          <Button
+            onClick={() => onClickReturn(info.row.original.id)}
+            className='bg-blue-500 text-white'
+          >
+            Return
+          </Button>
+        </div>
+      ),
+      footer: '',
+      header: 'Action',
+      size: 20,
     }),
   ];
 }
@@ -87,9 +103,8 @@ function TableBorrowItems() {
   const [deleteId, setDeleteId] = useState(null);
   const [search, setSearch] = useState('');
   const columns = getColumns({
-    onClickDelete: (id) => setDeleteId(id),
-    onClickEdit: (id) => {
-      navigate(`/items/${id}/edit`);
+    onClickReturn: (id) => {
+      navigate(`/borrow-items/return/${id}`);
     },
   });
 
@@ -105,7 +120,7 @@ function TableBorrowItems() {
           items: item.items,
           borrowDate: dayjs(item.createdAt).format('DD MMM YYYY, HH:mm'),
           description: item.description,
-          returnDate: dayjs(item.returnedDate).format('DD MMM YYYY, HH:mm'),
+          returnBefore: dayjs(item.returnBefore).format('DD MMM YYYY, HH:mm'),
         }))
       );
     } catch (error) {
@@ -248,5 +263,35 @@ function TableBorrowItems() {
     </div>
   );
 }
+
+const ModalReturnItem = ({ returnItemId }) => {
+  return (
+    <ReactModal
+      isOpen={!!returnItemId}
+      style={{
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          zIndex: 1000,
+        },
+        content: {
+          width: '400px',
+          margin: 'auto',
+          borderRadius: '8px',
+          border: 'none',
+          padding: '0',
+          height: 'fit-content',
+        },
+      }}
+    >
+      <div className='bg-white p-6'>
+        <h2 className='mb-4'>Apakah anda yakin ingin menghapus item ini?</h2>
+        <div className='flex justify-end gap-4'>
+          <Button onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button onClick={() => handleDelete(deleteId)}>Delete</Button>
+        </div>
+      </div>
+    </ReactModal>
+  );
+};
 
 export default TableBorrowItems;

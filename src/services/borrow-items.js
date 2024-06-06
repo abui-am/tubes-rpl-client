@@ -12,6 +12,10 @@ export function createBorrowItem(data) {
   return api.post('/borrow-items', data);
 }
 
+export function updateBorrowItem(id, data) {
+  return api.put(`/borrow-items/${id}`, data);
+}
+
 /**
  *  "userId" : 16,
     "borrowerId" : 7,

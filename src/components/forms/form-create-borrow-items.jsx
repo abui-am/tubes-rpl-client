@@ -2,7 +2,6 @@ import { useForm, useWatch } from 'react-hook-form';
 import Input from '../common/input';
 import toast from 'react-hot-toast';
 import Button from '../common/button';
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { getItems } from '../../services/item';
 import CreatableSelect from 'react-select/creatable';
@@ -45,7 +44,7 @@ const schema = yup
         quantity: yup.number().typeError('Must be number').required('Required'),
       })
     ),
-    returnedDate: yup.date().typeError('Must be date').required('Required'),
+    returnBefore: yup.date().typeError('Must be date').required('Required'),
     description: yup.string().typeError('Must be string'),
   })
   .required();
@@ -68,7 +67,7 @@ function FormCreateBorrowItems({ defaultValues }) {
           quantity: null,
         },
       ],
-      returnedDate: new Date(),
+      returnBefore: new Date(),
       description: '',
     },
     resolver: yupResolver(schema),
@@ -80,7 +79,12 @@ function FormCreateBorrowItems({ defaultValues }) {
   const [borrowerName, setBorrowerName] = useState('');
   async function fetchBorrowers() {
     const res = await getBorrower();
-    setOptions(res.data.map((item) => ({ value: item.id, label: item.name })));
+    setOptions(
+      res.data.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }))
+    );
   }
   useEffect(() => {
     fetchBorrowers();
@@ -89,7 +93,10 @@ function FormCreateBorrowItems({ defaultValues }) {
   async function fetchItems() {
     const res = await getItems();
     setItemOptions(
-      res.data.map((item) => ({ value: item.id, label: item.name }))
+      res.data.map((item) => ({
+        value: item.id,
+        label: item.name + ' (' + item.quantity + ' left)',
+      }))
     );
   }
   useEffect(() => {
@@ -103,8 +110,8 @@ function FormCreateBorrowItems({ defaultValues }) {
     control: control,
   });
 
-  const returnedDate = useWatch({
-    name: 'returnedDate',
+  const returnBefore = useWatch({
+    name: 'returnBefore',
     defaultValue: new Date(),
     control: control,
   });
@@ -125,7 +132,7 @@ function FormCreateBorrowItems({ defaultValues }) {
         userId: userId,
         borrowerId: +data.borrower.value,
         items,
-        returnedDate: dayjs(data.returnedDate).toISOString(),
+        returnBefore: dayjs(data.returnBefore).toISOString(),
         description: data.description,
       });
       toast.success('Borrower Item created successfully');
@@ -296,18 +303,18 @@ function FormCreateBorrowItems({ defaultValues }) {
             </span>
             <ReactDatePicker
               onChange={(date) => {
-                setValue('returnedDate', date, {
+                setValue('returnBefore', date, {
                   shouldValidate: true,
                   shouldDirty: true,
                 });
               }}
-              selected={returnedDate}
+              selected={returnBefore}
               dateFormat='dd MMM YYYY'
               className='w-full border border-neutral-300 rounded-lg p-2'
             />
-            {errors.returnedDate && (
+            {errors.returnBefore && (
               <span className='text-red-600 block mt-2'>
-                {errors.returnedDate.message}
+                {errors.returnBefore.message}
               </span>
             )}
           </div>
