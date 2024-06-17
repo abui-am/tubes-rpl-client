@@ -5,7 +5,7 @@ function Sidebar() {
   const user = Cookies.get('user') && JSON.parse(Cookies.get('user'));
 
   const role = user?.role;
-  const roleName = role.name;
+  const roleName = role?.name;
 
   return (
     <aside className='p-6 w-[207px] sticky top-0'>

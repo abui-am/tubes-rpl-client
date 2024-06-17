@@ -126,7 +126,7 @@ function FormCreateBorrowItems({ defaultValues }) {
 
       const user = Cookies.get('user') && JSON.parse(Cookies.get('user'));
 
-      const userId = user.id;
+      const userId = user?.id;
 
       await createBorrowItem({
         userId: userId,
