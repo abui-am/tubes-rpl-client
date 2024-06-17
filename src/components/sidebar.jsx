@@ -87,53 +87,10 @@ function Sidebar() {
 
           <span className='text-blueGray-400 text-sm'>Inventory</span>
         </Link>
-        <Link className='flex items-center gap-2  mb-4' to='/items/create'>
-          <svg
-            width='16'
-            height='16'
-            viewBox='0 0 16 16'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              d='M10 3.5H2C1.73478 3.5 1.48043 3.60536 1.29289 3.79289C1.10536 3.98043 1 4.23478 1 4.5V5.5C1.00105 5.67451 1.04776 5.84571 1.13547 5.99658C1.22319 6.14746 1.34886 6.27274 1.5 6.36V11.5C1.5 11.7652 1.60536 12.0196 1.79289 12.2071C1.98043 12.3946 2.23478 12.5 2.5 12.5H9.5C9.76522 12.5 10.0196 12.3946 10.2071 12.2071C10.3946 12.0196 10.5 11.7652 10.5 11.5V6.36C10.6511 6.27274 10.7768 6.14746 10.8645 5.99658C10.9522 5.84571 10.9989 5.67451 11 5.5V4.5C11 4.23478 10.8946 3.98043 10.7071 3.79289C10.5196 3.60536 10.2652 3.5 10 3.5ZM2 4.5H10V5.5H2V4.5ZM2.5 11.5V6.5H9.5V11.5H2.5Z'
-              fill='currentColor'
-            />
-            <path d='M4 7.5H8V8.5H4V7.5Z' fill='currentColor' />
-            <path
-              d='M13.5 6H14.5V7.5H16V8.5H14.5V10H13.5V8.5H12V7.5H13.5V6Z'
-              fill='currentColor'
-            />
-          </svg>
-
-          <span className='text-blueGray-400 text-sm'>Add Inventory</span>
-        </Link>
       </section>
       <section className='mt-8'>
         <h3 className='text-xs text-neutral-600 mb-4'>Borrow Inventory</h3>
-        <Link
-          className='flex items-center gap-2  mb-4'
-          to='/borrow-items/create'
-        >
-          <svg
-            width='16'
-            height='16'
-            viewBox='0 0 16 16'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              d='M13.3333 2H2.66665C2.31302 2 1.97389 2.14048 1.72384 2.39052C1.47379 2.64057 1.33331 2.97971 1.33331 3.33333V4.66667C1.33472 4.89935 1.39699 5.12762 1.51395 5.32878C1.6309 5.52994 1.79846 5.69699 1.99998 5.81333V12.6667C1.99998 13.0203 2.14046 13.3594 2.3905 13.6095C2.64055 13.8595 2.97969 14 3.33331 14H12.6666C13.0203 14 13.3594 13.8595 13.6095 13.6095C13.8595 13.3594 14 13.0203 14 12.6667V5.81333C14.2015 5.69699 14.3691 5.52994 14.486 5.32878C14.603 5.12762 14.6652 4.89935 14.6666 4.66667V3.33333C14.6666 2.97971 14.5262 2.64057 14.2761 2.39052C14.0261 2.14048 13.6869 2 13.3333 2ZM2.66665 3.33333H13.3333V4.66667H2.66665V3.33333ZM3.33331 12.6667V6H12.6666V12.6667H3.33331Z'
-              fill='currentColor'
-            />
-            <path
-              d='M5.33331 7.33333H10.6666V8.66667H5.33331V7.33333Z'
-              fill='currentColor'
-            />
-          </svg>
 
-          <span className='text-blueGray-400 text-sm'>Borrow Inventory</span>
-        </Link>
         <Link className='flex items-center gap-2  mb-4' to='/borrow-items'>
           <svg
             width='16'
