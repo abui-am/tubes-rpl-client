@@ -11,7 +11,7 @@ const Home = () => {
       navigate('/login');
     }
   }, [token, navigate]);
-  return <CommonLayout>Test</CommonLayout>;
+  return <CommonLayout>Please Click Menu in Sidebar to Navigate</CommonLayout>;
 };
 
 export default Home;
