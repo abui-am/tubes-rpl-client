@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 function Sidebar() {
-  const user = JSON.parse(Cookies.get('user'));
+  const user = Cookies.get('user') && JSON.parse(Cookies.get('user'));
 
   const role = user?.role;
   const roleName = role.name;

@@ -124,7 +124,7 @@ function FormCreateBorrowItems({ defaultValues }) {
         quantity: +item.quantity,
       }));
 
-      const user = JSON.parse(Cookies.get('user'));
+      const user = Cookies.get('user') && JSON.parse(Cookies.get('user'));
 
       const userId = user.id;
 
